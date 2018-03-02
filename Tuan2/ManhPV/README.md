@@ -218,3 +218,28 @@ Nhiệm vụ của Router đều là **định tuyến hết**. Nhưng ở Wan, 
 	- Thay thế phần gỡ bỏ đó bằng dạng format của protocol của đích đến.
 	- Cập nhật thông tin chuyển dữ liệu: địa chỉ, trạng thái của nơi gửi, nơi nhận.
 	- Gứi packet đến nơi nhận qua đường truyền tối ưu nhất.
+
+### <a name="router-types"></a> 2. Phân loại
+#### <a name="router-type-functions"></a> a. Theo chức năng
+- **Remote Access Router**
+- **ISDN Router**
+- **Serial router**
+- **Hub**
+- ...
+
+#### <a name="router-type-struct"></a> b. Theo cấu trúc
+- **Fixed configuration**
+- **Modular**
+
+### <a name="arp-protocol"></a> 3.ARP Protocol
+
+### <a name="router-dis-advantages"></a> 4. Ưu nhược điểm của Router
+#### <a name="router-advantages"></a> a.Ưu điểm
+Router có thể kết nối với các **loại mạng** khác lại với nhau, từ những *Ethernet* cục bộ tốc độ cao cho đến đường dây điện thoại đường dài có tốc độ chậm.
+
+#### <a name="router-disadvantages"></a> b.Nhược điểm
+-  Router **chậm hơn** *Bridge* vì chúng đòi hỏi nhiều tính toán hơn để tìm ra cách dẫn đường cho các gói tin, đặc biệt khi các mạng kết nối với nhau không cùng tốc độ.  
+- Router có đặc điểm **chuyên biệt theo giao thức**. Tức là cách một máy tính kết nối mạng giao tiếp với một router IP thì sẽ khác biệt với cách nó giao tiếp với một router Novell hay DECnet.
+- Tất cả các Router thương mại đều có thể xử lý nhiều loại giao thức, thường với chi phí phụ thêm cho mỗi giao thức.
+
+## <a name="switch-start"></a> V/ Switch
