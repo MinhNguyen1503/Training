@@ -152,7 +152,7 @@ Lưu và thoát ra. Nhập tiếp lệnh:
 - B3: Truy cập trang mặc định của NGinX và kiểm tra kết quả (ảnh)
 
 
-II - Tìm hiểu về DNS:
+# II-Tìm hiểu về DNS:
 2.1) DNS là gì ?
 
 DNS là từ viết tắt trong tiếng Anh của Domain Name System, là Hệ thống phân giải tên được phát minh vào năm 1984 cho Internet, chỉ một hệ thống cho phép thiết lập tương ứng giữa địa chỉ IP và tên miền. Hệ thống tên miền (DNS) là một hệ thống đặt tên theo thứ tự cho máy vi tính, dịch vụ, hoặc bất kỳ nguồn lực tham gia vào Internet. Nó liên kết nhiều thông tin đa dạng với tên miền được gán cho những người tham gia. Quan trọng nhất là, nó chuyển tên miền có ý nghĩa cho con người vào số định danh (nhị phân), liên kết với các trang thiết bị mạng cho các mục đích định vị và địa chỉ hóa các thiết bị khắp thế giới.
@@ -182,3 +182,78 @@ DNS có khả năng tra vấn các DNS server khác để có được một cá
 2.4) Cách sử dụng DNS
 
 Do các DNS có tốc độ biên dịch khác nhau, có thể nhanh hoặc có thể chậm, do đó người sử dụng có thể chọn DNS server để sử dụng cho riêng mình. Có các cách chọn lựa cho người sử dụng. Sử dụng DNS mặc định của nhà cung cấp dịch vụ (internet), trường hợp này người sử dụng không cần điền địa chỉ DNS vào network connections trong máy của mình. Sử dụng DNS server khác (miễn phí hoặc trả phí) thì phải điền địa chỉ DNS server vào network connections. Địa chỉ DNS server cũng là 4 nhóm số cách nhau bởi các dấu chấm.
+
+# III-Các câu lệnh T-SQL
+
+Các câu lệnh luôn kết thúc bằng dấu ";".
+
+**Nhóm lệnh thao tác dữ liệu – DML**
+
+Đây là nhóm lệnh phổ biến được dùng nhiều trong các phần mềm để thao tác đến các dữ liệu. Nhóm này bao gồm 4 lệnh: 
+
+![](https://tuandc.com/wp-content/uploads/2017/06/DML-SQL.png)
+
+*Lệnh SELECT trong SQL Server*
+
+* Lệnh được sử dụng để truy xuất các tập kết quả của các cột hay các hàng trong CSDL.
+* Cú pháp: `SELECT tên_cột FROM Tên_bảng`
+* Trong lệnh select bạn có thể tạo ra các trường tính toán hoặc nối các bảng dữ liệu lại với nhau để truy vấn. ví dụ mình có 2 bảng sinh_vien và diem mình sẽ nối như sau: SELECT * FROM sinh_vien join diem ON sinh_vien.id = diem.id_sinhvien.
+* Trong SELECT còn có 2 phép Join là Inner join (chỉ hiển thị các dòng có các trường bằng nhau) và outer join (hiển thị cả những dòng không có trường bằng nhau).
+* Trong phần tên_cột bạn có thể thêm AS để đặt trên cho cột đó ví dụ SELECT (toan+ly) AS diemtoanly FROM sinh_vien join diem ON sinh_vien.id = diem.id_sinhvien.
+
+*Lệnh INSERT trong SQL Server* 
+
+* Để thêm dữ liệu vào CSDL bạn cần một câu lệnh để làm việc này và đó là lệnh INSERT.
+* Cú pháp: `INSERT INTO Tên_bảng (tên_các_trường) VALUES (giá_trị_thêm)`
+* Trong lệnh này nếu muốn thêm vào dữ liệu có hỗ trợ chữ tiếng việt có đấu bạn phải thêm chữ N phía trước. Ví dụ: `INSERT INTO sinh_vien (ten_sinh_vien, tuoi) VALUES (N"Tuấn",18)`
+
+
+*Lệnh UPDATE trong SQL Server*
+
+* Để cập nhật, thay đổi dữ liệu cần sử dụng một câu lệnh có tên UPDATE.
+* Cú pháp: UPDATE Tên_bảng SET tên_trường = giá_trị WHERE điều kiện.
+* Với lệnh này bạn thường phải đưa ra điều kiện để xác định, thông thường là trường ID, ví dụ: `UPDATE sinh_vien SET ten = N"Tuấn ĐC" WHERE id=1`
+
+*Lệnh DELETE trong SQL Server*
+
+* Mặc dù lệnh DELETE rất ít được sử dụng trong các vấn đề yêu cầu sự toàn vẹn và không để mất mát dữ liệu, nhưng lệnh này cũng được đưa ra như một vấn đề tất yếu.
+* Cú pháp: `DELETE FROM tên_bảng WHERE điều_kiện`
+* Trong lệnh này bạn không cần đưa vào trường nhưng bạn cần đưa vào điều kiện để xóa. Nếu không có điều kiện dữ liệu trong bảng có thể bị xóa hết.
+
+*Tạo Procedure trong SQL Server*
+
+* Procedure là thủ tục được lưu trữ sẵn trong csdl. Nó được sử dụng để hạng chế phần mềm truy vấn thẳng để các bảng hay trường của csdl, thay vào đó chỉ cần truyền đến các thông số hoặc gửi yêu cầu.
+* Cú pháp: `CREATE PROCEDURE tên_thủ_tục @Tham_số [kiểu_dữ_liệu] AS Lệnh_DML`
+* Cú pháp thực thi: EXEC tên_thủ_tục 'Tham số'.
+* VD: `CREATE PROCEDURE lay_du_lieu_sv @so_luong int AS SELECT TOP @so_luong FROM ten_sinh_vien`
+
+**Nhóm lệnh định nghĩa dữ liệu – DDL**
+
+![](https://tuandc.com/wp-content/uploads/2017/06/DDL-SQL.png)
+
+Nhóm lệnh này rất ít được sử dụng bởi các phần mềm, tuy nhiên chúng là những lệnh rất quan trọng có thể làm thay đổi csdl ở mức lớn nhất. Nhóm lệnh này thường chỉ được sử dụng bởi các Database Admin (DBA).
+
+*Lệnh CREATE DATABASE trong SQL Server*
+
+* Trong một hệ quản trị csdl có chứa rất nhiều csdl. các hệ hỗ trợ những đoạn lệnh khác nhau để tạo ra một database. Trong SQL Server cũng có câu lệnh để làm việc này.
+* Cú pháp: `CREATE DATABASE tên_csdl`
+
+*Lệnh CREATE TABLE trong SQL Server*
+
+* Chúng ta đã biết trong một database sẽ có nhiều bảng (table), để tạo ra các bảng ta có câu lệnh để tạo bảng.
+* Cú pháp: `CREATE TABLE tên_bảng (tên_cột_1 [kiểu_dữ_liệu],  tên_cột_2 [kiểu_dữ_liệu],....)`
+
+*Lệnh ALTER TABLE trong SQL Server*
+
+* SQL hỗ trợ các lệnh thay đổi bảng sau khi đã tạo như thêm (ADD) các trường (cột), Xóa (DROP) các trường, Sửa (ALTER) các trường.
+* Cú pháp thêm cột vào bảng: `ALTER TABLE Tên_bảng ADD Tên_cột [kiểu_dữ_liệu]`
+* Cú pháp xóa một cột trong bảng: `ALTER TABLE Tên_bảng DROP COLUMN Tên_cột`
+* Cú pháp sửa một cột trong bảng: `ALTER TABLE Tên_bảng ALTER COLUMN Tên_cột [kiểu_dữ_liệu]`
+
+*Lệnh DROP TABLE trong SQL Server*
+
+* Mặc dù không khuyến khích nhưng nó vẫn thường xuyên được sử dụng để loại bỏ đi các bảng thừa. Mặc dù có thể dùng Management studio (SSMS) để thực hiện việc này nhanh hơn nhưng với lệnh bạn có thể thao tác nhanh hơn.
+* Cú pháp: `DROP TABLE Tên_bảng`
+
+
+
