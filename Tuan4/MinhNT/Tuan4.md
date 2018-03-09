@@ -255,5 +255,300 @@ Nhóm lệnh này rất ít được sử dụng bởi các phần mềm, tuy nh
 * Mặc dù không khuyến khích nhưng nó vẫn thường xuyên được sử dụng để loại bỏ đi các bảng thừa. Mặc dù có thể dùng Management studio (SSMS) để thực hiện việc này nhanh hơn nhưng với lệnh bạn có thể thao tác nhanh hơn.
 * Cú pháp: `DROP TABLE Tên_bảng`
 
+# IV-Cài đặt Wordpress:
+
+**Bước 1: Tạo MySQL Database và User cho WordPress:**
+
+- Login vào mysql với lệnh: 
+
+        mysql -u root -p
+
+- Điền password vào để đăng nhập vào mysql.
+- Tạo cơ sở dữ liệu cho Wordpress
+ 
+        CREATE DATABASE wordpress;
+
+- Tạo user để quản lí riêng cơ sở dữ liệu này:
+
+        CREATE USER wordpressuser@localhost IDENTIFIED BY 'password';
+
+- Gán quyền quản lí cơ sở dữ liệu "wordpress" cho user này:
+
+        GRANT ALL PRIVILEGES ON wordpress.* TO wordpressuser@localhost;
+
+- Thêm câu lệnh sau rồi thoát khỏi mysql
+
+        FLUSH PRIVILEGES;
+        exit
+
+**Bước 2: Tải mã nguồn Wordpress:**
+
+- Chỉ tới thư mục /var/www/wordpress và tải về:
+
+        cd /var/www/
+        sudo wget http://wordpress.org/latest.tar.gz
+
+- Tiếp theo giải nén file mới tải về:
+
+        sudo tar xzvf latest.tar.gz
+
+**Bước 3: Config Wordpress **
+
+- Tiến vào thư mục gốc của wordpress
+
+        cd ~/wordpress
+
+- Tạo ra file wp-config.php dành cho wordpress (chứa user, password của cơ sở dữ liệu mà bạn tạo ở bước 1):
+
+        sudo cp wp-config-sample.php wp-config.php
+
+- Mở file mới tạo ra bằng lệnh nano:
+
+        sudo nano wp-config.php
+
+- Tìm và sửa name-user-password tương ứng với thông tin ở bước 1.
+
+>// MySQL settings - You can get this info from your web host** //  
+/** The name of the database for WordPress */  
+define('DB_NAME', 'wordpress');  
+/** MySQL database username */  
+define('DB_USER', 'wordpressuser');  
+/** MySQL database password */  
+define('DB_PASSWORD', 'password');
+
+Lưu và thoát ra ngoài.
+
+**Bước 4: Phân quyền, tạo thư mục chứa ảnh, tài liệu upload**  
+
+- Dùng lệnh sau để đảm bảo bạn có quyền truy cập mọi thứ trong thư mục từ internet qua giao thức web:
+
+        sudo chown -R www-data:www-data * 
+
+( chú ý, bạn vẫn đang ở đường dẫn /var/www/wordpress). 
+
+- Hoặc nếu bạn đang ở nơi khác thì bạn có thể dùng lệnh sau:
+        
+        sudo chown -R www-data:www-data /var/www/wordpress
+
+- Tạo thư mục uploads để lưu trữ ( những thứ bạn sẽ tải lên website)
+
+        sudo mkdir /var/www/wordpress/wp-content/uploads
+
+- Dùng câu lệnh sau để cho phép trình duyệt tải file lên thư mục này:
+
+        sudo chown -R :www-data /var/www/wordpress/wp-content/uploads
 
 
+Bước 5: Cài đặt Wordpress
+
+    http://server_domain_name_or_IP/wordpress
+
+Theo mặc định, nếu bạn vào địa chỉ ip hoặc domain máy, bạn sẽ đến trang mặc định của apache2. Trên Ubuntu desktop, bạn chỉ việc vào http://localhost/wordpress là xong:
+
+![](https://assets.digitalocean.com/articles/wordpress_1404/initial_config.png)
+
+Điền các thông tin cần thiết:
+
+![](https://assets.digitalocean.com/articles/wordpress_1404/confirm_install.png)
+
+Vậy là xong, bạn sẽ được đăng nhập vào giao diện admin của Wordpress tại địa chỉ:
+http://localhost/wordpress/wp-admin ( Ubuntu desktop)  
+*Hoặc*  
+http://server_domain_name_or_IP/wordpress/wp-admin ( Ubuntu server- truy cập từ máy khác)
+
+![](https://assets.digitalocean.com/articles/wordpress_1404/login.png)
+
+
+
+-------------------------------------
+# V-Mô hình Master - Master
+
+Mô hình này cho phép đọc và ghi dữ liệu trên cả 2 Server. Lúc này, 2 Server vừa đóng vai trò của Master, vừa đóng vai trờ của Slave.
+
+Máy Master 1: 192.168.1.6
+Máy Master 2: 192.168.1.7
+
+**Đăng nhập vào Master 1**
+
+* Cấu hình file `mysql.cnf`:
+
+        sudo gedit /etc/mysql/mysql.conf.d/mysqld.cnf
+        bind-address = 192.168.1.6
+        server-id = 1
+
+* Thêm vào các dòng sau:
+
+        log_bin = /var/log/mysql/mysql-bin.log
+        log_bin_index =/var/log/mysql/mysql-bin.log.index
+        relay_log = /var/log/mysql/mysql-relay-bin
+        relay_log_index = /var/log/mysql/mysql-relay-bin.index
+        log_slave_updates = 1
+        auto-increment-increment = 2
+        auto-increment-offset = 1
+
+* Khởi động lại MySQL Server: 
+        
+        sudo service mysql restart
+
+* Đăng nhập vào Mysql Server: 
+     
+        mysql -u root -p
+
+* Tạo tài khoản người dùng mới:
+
+        mysql > create user 'replica'@'%' identified by 'password';
+        mysql > GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
+        mysql > FLUSH PRIVILEGES;
+
+* Xem File và Positon
+
+        mysql > show master status;
+
+![]()
+
+**Đăng nhập vào Master 2**
+
+* Cấu hình file `mysql.cnf`:
+
+        sudo gedit /etc/mysql/mysql.conf.d/mysqld.cnf
+        bind-address = 192.168.1.6
+        server-id = 1
+
+* Thêm vào các dòng sau:
+
+        log_bin = /var/log/mysql/mysql-bin.log
+        log_bin_index =/var/log/mysql/mysql-bin.log.index
+        relay_log = /var/log/mysql/mysql-relay-bin
+        relay_log_index = /var/log/mysql/mysql-relay-bin.index
+        log_slave_updates = 1
+        auto-increment-increment = 2
+        auto-increment-offset = 1
+
+* Khởi động lại MySQL Server: 
+
+        sudo service mysql restart
+
+* Đăng nhập vào Mysql Server: 
+
+        mysql -u root -p
+
+* Kết nối với Master 1:
+
+`mysql > stop slave; `
+
+`mysql > CHANGE MASTER TO MASTER_HOST = '107.22.99.68', MASTER_USER = 'replica', MASTER_PASSWORD = 'password', MASTER_LOG_FILE = 'mysql-bin.000002', MASTER_LOG_POS = 154; 
+mysql > start slave;`
+
+* Xem File và Positon
+
+        mysql > show master status;
+
+**Đăng nhập vào Master 1**
+
+* Kết nối với Master 1:
+
+`mysql > stop slave; `
+
+`mysql > CHANGE MASTER TO MASTER_HOST = '107.22.99.68', MASTER_USER = 'replica', MASTER_PASSWORD = 'password', MASTER_LOG_FILE = 'mysql-bin.000002', MASTER_LOG_POS = 154; 
+mysql > start slave;`
+
+* Tạo cơ sở dữ liệu mới để kiểm tra kết nối
+
+        mysql > create database demo;
+
+**Đăng nhập vào Master 2**
+
+* Kiểm tra cơ sở dữ liệu được tạo
+
+        mysql > show databases;
+
+# VI-Mô hình Master - Slave
+
+Mô hình này cho phép Server Master đọc và ghi dữ liệu, sau đó cập  nhật những dữ liệu đã thay đổi sang Server Slave.
+Slave chỉ có quyền đọc dữ liệu.
+
+Máy Master: 192.168.1.6
+Máy Slave: 192.168.1.7
+
+**Đăng nhập vào Master**
+
+* Cấu hình file `mysql.cnf`:
+
+        sudo gedit /etc/mysql/mysql.conf.d/mysqld.cnf
+        bind-address = 192.168.1.6
+        server-id = 1
+
+* Thêm vào các dòng sau:
+
+        log_bin = /var/log/mysql/mysql-bin.log
+        log_bin_index =/var/log/mysql/mysql-bin.log.index
+        relay_log = /var/log/mysql/mysql-relay-bin
+        relay_log_index = /var/log/mysql/mysql-relay-bin.index
+
+* Khởi động lại MySQL Server: 
+
+        sudo service mysql restart
+
+* Đăng nhập vào Mysql Server: 
+
+        mysql -u root -p
+
+* Tạo tài khoản người dùng mới
+
+        mysql > create user 'replication'@'%' identified by 'password';
+        mysql > GRANT REPLICATION SLAVE ON *.* TO 'replication'@'%';
+        mysql > FLUSH PRIVILEGES;
+
+* Xem File và Positon
+
+        mysql > show master status;
+
+![]()
+
+**Đăng nhập vào Slave**
+
+* Cấu hình file `mysql.cnf`:
+
+        sudo gedit /etc/mysql/mysql.conf.d/mysqld.cnf
+        bind-address = 192.168.1.7
+        server-id = 2
+
+* Thêm vào các dòng sau:
+
+        log_bin = /var/log/mysql/mysql-bin.log
+        log_bin_index =/var/log/mysql/mysql-bin.log.index
+        relay_log = /var/log/mysql/mysql-relay-bin
+        relay_log_index = /var/log/mysql/mysql-relay-bin.index
+
+* Khởi động lại MySQL Server: 
+
+        sudo service mysql restart
+
+* Đăng nhập vào MySQL Server: 
+
+        mysql -u root -p
+
+* Kết nối tới Master:
+
+`mysql > stop slave;`
+
+`mysql > CHANGE MASTER TO MASTER_HOST = 'master-ip', MASTER_USER = 'replica', MASTER_PASSWORD = 'password', MASTER_LOG_FILE = 'mysql-bin.000001', MASTER_LOG_POS = 753;` 
+`mysql > start slave;`
+
+**Đăng nhập vào Master**
+
+        mysql -u root -p
+
+* Tạo cơ sở dữ liệu mới:
+
+        mysql > create database people;
+
+**Đăng nhập vào Slave**
+
+* Đăng nhập vào Mysql Server: 
+
+        mysql -u root -p
+
+* Xem cơ sở dữ liệu vừa mới cập nhật:
+
+        mysql > show databases;
